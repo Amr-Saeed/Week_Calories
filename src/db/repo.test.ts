@@ -148,7 +148,7 @@ describe('week settings', () => {
 
   it('can reorganise when the user explicitly asks', async () => {
     await repo.updateSettings({ weekStartDay: 1 }, '2026-11-11', { reorganize: true });
-    expect((await db.settings.get('main'))?.weekAnchors).toEqual(['2026-11-09']);
+    expect((await db.settings.get('main'))?.weekAnchors).toEqual(['2026-11-07']);
   });
 });
 

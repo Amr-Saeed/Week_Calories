@@ -87,17 +87,46 @@ function DayForm({ date, today, firstDay, versions }: { date: string; today: str
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (entered === null) return setError(mode === 'meals' ? 'Enter calories for at least one meal' : 'Enter the calories for this day');
+    if (mode === 'meals') {
+      await saveMeals(true);
+      return;
+    }
+    if (entered === null) return setError('Enter the calories for this day');
     if (Number.isNaN(entered)) return setError('Enter a number');
     setBusy(true);
     try {
       await repo.saveLog(
-        { date, totalCalories: entered, meals: mode === 'meals' ? parsedMeals : undefined, notes: notes.trim() || undefined },
+        { date, totalCalories: entered, meals: undefined, notes: notes.trim() || undefined },
         today,
       );
       goBack();
     } catch (err) {
       setError(err instanceof ValidationError ? err.message : 'Could not save. Please try again.');
+      setBusy(false);
+    }
+  };
+
+  const saveMeals = async (calculate: boolean, mealKey?: keyof MealBreakdown) => {
+    setError(null);
+    if (mealKey && meals[mealKey].trim() === '') {
+      setError(`Enter calories for ${MEALS.find((meal) => meal.key === mealKey)?.label.toLowerCase() ?? 'this meal'} before saving`);
+      return;
+    }
+    if (mealKey && Number.isNaN(Number(meals[mealKey]))) {
+      setError('Enter a number');
+      return;
+    }
+    if (entered === null) {
+      setError('Enter calories for at least one meal');
+      return;
+    }
+    setBusy(true);
+    try {
+      await repo.saveLog({ date, totalCalories: entered, meals: parsedMeals, notes: notes.trim() || undefined }, today);
+      if (calculate) goBack();
+    } catch (err) {
+      setError(err instanceof ValidationError ? err.message : 'Could not save. Please try again.');
+    } finally {
       setBusy(false);
     }
   };
@@ -157,17 +186,29 @@ function DayForm({ date, today, firstDay, versions }: { date: string; today: str
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {MEALS.map(({ key, label }) => (
-                <TextField
-                  key={key}
-                  label={label}
-                  type="number"
-                  inputMode="numeric"
-                  min={0}
-                  value={meals[key]}
-                  onChange={(e) => setMeals((m) => ({ ...m, [key]: e.target.value }))}
-                  suffix="kcal"
-                  disabled={locked}
-                />
+                <div key={key} className="flex items-end gap-2">
+                  <TextField
+                    label={label}
+                    type="number"
+                    inputMode="numeric"
+                    min={0}
+                    value={meals[key]}
+                    onChange={(e) => setMeals((m) => ({ ...m, [key]: e.target.value }))}
+                    suffix="kcal"
+                    disabled={locked}
+                    wrapperClassName="min-w-0 flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => saveMeals(false, key)}
+                    disabled={busy || locked}
+                    aria-label={`Save ${label.toLowerCase()}`}
+                  >
+                    Save
+                  </Button>
+                </div>
               ))}
               <p className="col-span-2 text-sm text-slate-600 dark:text-slate-300">
                 Total: <strong className="tabular-nums">{entered === null ? '—' : formatKcal(entered)}</strong>
@@ -195,7 +236,7 @@ function DayForm({ date, today, firstDay, versions }: { date: string; today: str
         {error && <Alert tone="error">{error}</Alert>}
 
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" disabled={busy || locked} className="min-w-[120px]">{log ? 'Save changes' : 'Save'}</Button>
+          <Button type="submit" disabled={busy || locked} className="min-w-[120px]">{mode === 'meals' ? 'Calculate day' : log ? 'Save changes' : 'Save'}</Button>
           <Button type="button" variant="secondary" onClick={goBack}>Cancel</Button>
           {log && (
             <Button type="button" variant="ghost" onClick={clear} className="ml-auto text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10">

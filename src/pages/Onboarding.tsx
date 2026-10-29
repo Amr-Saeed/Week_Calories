@@ -9,7 +9,7 @@ import { GoalSummary } from '@/components/GoalSummary';
 import { Alert, Button, Card, Segmented, SelectField, TextField } from '@/components/ui';
 import { bodyInputs, convertDraftUnits, emptyDraft, validateDraft, type ProfileDraft } from '@/lib/draft';
 import { buildPlan } from '@/lib/calories';
-import { formatFull, formatRange, isValidISODate, WEEKDAY_NAMES, weekdayOf, addDays } from '@/lib/dates';
+import { formatRange, isValidISODate, WEEKDAY_NAMES, weekdayOf, addDays } from '@/lib/dates';
 import { resolveFirstAnchor } from '@/lib/week';
 import { applyTheme } from '@/hooks/useTheme';
 
@@ -128,7 +128,11 @@ export default function Onboarding() {
                 label="First tracking week begins"
                 type="date"
                 value={firstDate}
-                onChange={(e) => setFirstDate(e.target.value)}
+                onChange={(e) => {
+                  const nextDate = e.target.value;
+                  setFirstDate(nextDate);
+                  if (isValidISODate(nextDate)) setWeekStartDay(weekdayOf(nextDate));
+                }}
                 error={dateOk ? undefined : 'Choose a valid date'}
               />
             </div>
@@ -137,11 +141,6 @@ export default function Onboarding() {
                 <Alert tone="success">
                   Week 1 runs <strong>{formatRange(anchor, addDays(anchor, 6))}</strong>, then every {WEEKDAY_NAMES[weekStartDay]} starts a new 7-day week.
                 </Alert>
-                {anchor !== firstDate && (
-                  <Alert tone="info">
-                    {formatFull(firstDate)} isn't a {WEEKDAY_NAMES[weekStartDay]}, so tracking begins on the next one: {formatFull(anchor)}.
-                  </Alert>
-                )}
               </div>
             )}
           </Card>

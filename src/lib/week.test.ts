@@ -35,8 +35,8 @@ describe('week boundaries', () => {
     expect(getPeriodForDate(anchors, '2026-11-06')).toBeNull();
   });
 
-  it('snaps the first date forward to the chosen week-start day', () => {
-    expect(resolveFirstAnchor('2026-11-09', SAT)).toBe('2026-11-14');
+  it('starts on the exact date chosen by the user', () => {
+    expect(resolveFirstAnchor('2026-11-09', SAT)).toBe('2026-11-09');
     expect(resolveFirstAnchor('2026-11-07', SAT)).toBe('2026-11-07');
   });
 
@@ -117,10 +117,10 @@ describe('changing the week-start day', () => {
   });
 
   it('rebuilds freely if tracking has not started', () => {
-    expect(scheduleWithNewWeekStart(sat, MON, '2026-10-01', '2026-11-07')).toEqual(['2026-11-09']);
+    expect(scheduleWithNewWeekStart(sat, MON, '2026-10-01', '2026-11-07')).toEqual(['2026-11-07']);
   });
 
   it('reorganizes everything only when explicitly requested', () => {
-    expect(scheduleFromScratch('2026-11-07', MON)).toEqual(['2026-11-09']);
+    expect(scheduleFromScratch('2026-11-07', MON)).toEqual(['2026-11-07']);
   });
 });

@@ -9,9 +9,10 @@ import { addDays, compareDates, dateRange, diffInDays, nextWeekdayOnOrAfter, wee
  * overlap. Because a new week-start day only ever adds a *future* anchor, past periods are stable.
  */
 
-/** First date on/after the chosen date that actually falls on the chosen week-start day. */
+/** The first tracking week starts on the exact date chosen by the user. */
 export function resolveFirstAnchor(firstTrackingDate: ISODate, weekStartDay: WeekdayIndex): ISODate {
-  return nextWeekdayOnOrAfter(firstTrackingDate, weekStartDay);
+  void weekStartDay;
+  return firstTrackingDate;
 }
 
 export function getPeriodForDate(anchors: readonly ISODate[], date: ISODate): WeekPeriod | null {
@@ -82,7 +83,7 @@ export function scheduleWithNewWeekStart(
   return [...started, candidate];
 }
 
-/** Explicit "reorganize everything" option: rebuild the schedule from a new first date and day. */
+/** Explicit "reorganize everything" option: rebuild the schedule from the exact first date. */
 export function scheduleFromScratch(firstTrackingDate: ISODate, weekStartDay: WeekdayIndex): ISODate[] {
   return [resolveFirstAnchor(firstTrackingDate, weekStartDay)];
 }

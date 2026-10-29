@@ -162,7 +162,7 @@ function SettingsInner() {
           </div>
         )}
         {firstChanged && firstAnchorPreview && (
-          <div className="mt-4"><Alert tone="warning">Week 1 will start on {formatFull(firstAnchorPreview)} and all weeks will be rebuilt from there.</Alert></div>
+          <div className="mt-4"><Alert tone="warning">Week 1 will start on your chosen date, {formatFull(firstAnchorPreview)}, and all weeks will be rebuilt from there.</Alert></div>
         )}
         {pending.length > 0 && !dayChanged && !firstChanged && (
           <div className="mt-4"><Alert tone="info">A new week-start day takes effect on {formatFull(pending[pending.length - 1])}.</Alert></div>
